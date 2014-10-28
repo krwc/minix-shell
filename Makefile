@@ -1,7 +1,7 @@
 CC=clang
 CFLAGS=-g
 
-SOURCES=src/main.c src/eval.c src/message.c src/prompt.c src/input.c
+SOURCES=src/main.c src/eval.c src/message.c src/prompt.c src/input.c src/builtins.c
 OBJS=$(SOURCES:.c=.o)
 LIBS=src/parser-core/parser-core.a
 

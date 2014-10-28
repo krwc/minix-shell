@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include "eval.h"
+#include "builtins.h"
+#include "message.h"
 
 bool eval_command_has_line(Command* cmd)
 {
@@ -19,6 +21,17 @@ void eval(Command* cmd)
     // When parsed line is a comment, we simply can ignore it now.
     if (!eval_command_has_line(cmd))
         return;
+    
+    // If it is builtin function, execute it and return;
+    for (Builtin* builtin = builtin_list; builtin->name != NULL; builtin++)
+    {
+        if (!strcmp(builtin->name, cmd->argv[0]))
+        {
+            if (builtin->callback(cmd->argc, cmd->argv) != 0)
+                fprintf(stderr, "Builtin %s error.\n", builtin->name);
+            return;
+        }
+    }
 
     int child_status;
     pid_t child = fork();

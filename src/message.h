@@ -6,4 +6,5 @@
 
 void message_error(const char* program, const char* message);
 void message(int output, const char* message);
+
 #endif

@@ -22,6 +22,7 @@ typedef struct Redirection
 typedef struct Command 
 {
     char** argv; 		/* NULL ended array of arguments */
+    int argc;                   /* number of arguments passed */
     Redirection** redirs;	/* NULL ended array of pointers to Redirections */
 } Command;  
 
