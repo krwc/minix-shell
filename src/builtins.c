@@ -1,5 +1,6 @@
 #include "builtins.h"
 #include "message.h"
+#include "main.h"
 #include <signal.h>
 #include <dirent.h>
 
@@ -34,7 +35,15 @@ int builtin_cd(int argc, char** argv)
         return -1;
     const char* path = argv[1] ? argv[1] : getenv("HOME");
     
-    return chdir(path);
+    int ret = chdir(path);
+
+    if (ret != -1)
+    {
+        memcpy(shell_workdir, path, strlen(path));
+        getcwd(shell_workdir, MAX_DIR_LENGTH);
+    }
+
+    return ret;
 }
 
 int builtin_kill(int argc, char** argv)
