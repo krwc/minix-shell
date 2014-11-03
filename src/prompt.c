@@ -3,19 +3,82 @@
 #include "main.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-void prompt_prepare()
+const char* prompt_get_username()
 {
-    // If shell_workdir begins with shell_home, print '~'
+    static char name[256];
+    getlogin_r(name, 255);
+    return name;
+}
+
+const char* prompt_get_hostname()
+{
+    static char hostname[256];
+    gethostname(hostname, 255);
+    return hostname;
+}
+
+const char* prompt_get_workdir()
+{
+    static char workdir[256];
+
+    // If workdir starts with $HOME, then we append ~.
     if (!strncmp(shell_home, shell_workdir, strlen(shell_home)))
-    {
-        snprintf(prompt_buffer, MAX_PROMPT_LENGTH - 1, "%s~%s %s$%s ", COLOR_BLUE,
-                 shell_workdir + strlen(shell_home), COLOR_GREEN, COLOR_NONE);
-    }
+        snprintf(workdir, 255, "~%s", shell_workdir + strlen(shell_home));
     else
+        snprintf(workdir, 255, "%s", shell_workdir);
+    return workdir;
+}
+
+char prompt_get_usermode()
+{
+    return getuid() == 0 ? '#' : '$';
+}
+
+void prompt_append_char(char character, size_t* offset)
+{
+    if (*offset < MAX_PROMPT_LENGTH)
     {
-        snprintf(prompt_buffer, MAX_PROMPT_LENGTH - 1, "%s%s %s$%s ", COLOR_BLUE,
-                 shell_workdir, COLOR_GREEN, COLOR_NONE);
+        prompt_buffer[(*offset)++] = character;
+        prompt_buffer[*offset] = '\0';
+    }
+}
+
+void prompt_append_string(const char* string, size_t* offset)
+{
+    for (size_t i = 0; i < strlen(string); i++)
+        prompt_append_char(string[i], offset);
+}
+
+void prompt_prepare(const char* prompt_declaration)
+{
+    // Prompt buffer iterator
+    size_t i = 0;
+
+    for (const char* ch = prompt_declaration; *ch; ch++)
+    {
+        if (*ch == '\\')
+        {
+            char escaped_char = *(ch + 1);
+          
+            if (escaped_char == PROMPT_MOD_HOST)
+                prompt_append_string(prompt_get_hostname(), &i);
+            else if (escaped_char == PROMPT_MOD_USER)
+                prompt_append_string(prompt_get_username(), &i);
+            else if (escaped_char == PROMPT_MOD_MODE)
+                prompt_append_char(prompt_get_usermode(), &i);
+            else if (escaped_char == PROMPT_MOD_WORKDIR)
+                prompt_append_string(prompt_get_workdir(), &i); 
+            else
+            {
+                prompt_append_char(*ch, &i);
+                continue;
+            }
+            ch++;
+        }
+        else
+            prompt_append_char(*ch, &i);
     }
 }
 
@@ -27,7 +90,7 @@ void print_prompt()
     // Write prompt if stdin is a character-device.
     if (S_ISCHR(input_stat.st_mode))
     {
-        prompt_prepare();
+        prompt_prepare(PROMPT_DEFAULT);
         write(STDOUT, prompt_buffer, strlen(prompt_buffer));
     }
 }
