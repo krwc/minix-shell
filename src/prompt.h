@@ -17,7 +17,7 @@
 #define PROMPT_MOD_WORKDIR 'w'
 
 // Default prompt
-#define PROMPT_DEFAULT "\\u@\\h \\w \\$ "
+#define PROMPT_DEFAULT "\033[1;36m\\u@\\h \033[1;35m\\w \\$\033[0m "
 
 // Maximal prompt length
 #define MAX_PROMPT_LENGTH 2048
