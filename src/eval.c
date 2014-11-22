@@ -99,6 +99,7 @@ int eval(Command* cmd)
 //            printf("%s has input: %d\n", cmd->argv[0], fd[STDIN]);
             close(STDIN);
             dup2(fd[STDIN], STDIN);
+            close(fd[STDIN]);
         }
         else if (cmd->input.type == STREAM_FILE)
         {
@@ -113,6 +114,7 @@ int eval(Command* cmd)
         {
             close(STDOUT);
             dup2(fd[STDOUT], STDOUT);
+            close(fd[STDOUT]);
         }
         else
         {
