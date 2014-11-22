@@ -19,10 +19,28 @@ typedef struct Redirection
     int flags;
 } Redirection;
 
+typedef enum StreamType
+{
+    STREAM_STDIN,
+    STREAM_STDOUT,
+    STREAM_PIPE_IN,
+    STREAM_PIPE_OUT,
+    STREAM_FILE,
+    STREAM_FILE_APPEND
+} StreamType;
+
+typedef struct Stream
+{
+    StreamType type;
+    char* file;
+} Stream;
+
 typedef struct Command 
 {
     char** argv; 		/* NULL ended array of arguments */
     int argc;                   /* number of arguments passed */
+    Stream input;
+    Stream output;
     Redirection** redirs;	/* NULL ended array of pointers to Redirections */
 } Command;  
 

@@ -20,16 +20,11 @@ void parser_parse_line(const char* input)
             command->input.type  = STREAM_STDIN;
             command->output.type = STREAM_STDOUT;
 
+
             if (parser_has_next_command())
-            {
-//                printf("%s has next\n", command->argv[0]);
                 command->output.type = STREAM_PIPE_IN;
-            }
             if (parser_has_prev_command())
-            {
-  //              printf("%s has prev\n", command->argv[0]);
                 command->input.type  = STREAM_PIPE_OUT;
-            }
             
             for (int i = 0; command->redirs[i] != NULL; i++)
             {

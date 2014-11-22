@@ -36,11 +36,14 @@ int main()
         
         while ((pipeline = parser_get_pipeline()))
         {
+            int num_children = 0;
             while ((command = parser_get_command()))
             {
-                eval(command);
+                num_children += eval(command);
                 parser_next_command();
             }
+            while (num_children--)
+                wait(NULL);
             parser_next_pipeline();
         }
         print_prompt();

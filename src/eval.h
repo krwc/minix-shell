@@ -4,6 +4,6 @@
 #include "parser-core/parser.h"
 
 /* evaluates the command */
-void eval(Command* cmd);
+int eval(Command* cmd);
 
 #endif
