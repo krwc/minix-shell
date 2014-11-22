@@ -126,14 +126,14 @@ int eval(Command* cmd)
         }
         else
         {
-            if (cmd->redirs[0])
+            if (cmd->redirs[0] && cmd->output.file)
             {
                 int flags = O_CREAT | O_WRONLY;
                 if (cmd->output.type == STREAM_FILE)
                     flags |= O_TRUNC;
-                if (cmd->output.type == STREAM_FILE_APPEND)
+                else if (cmd->output.type == STREAM_FILE_APPEND)
                     flags |= O_APPEND;
-
+                
                 dup2(open(cmd->output.file, flags,
                           S_IWUSR | S_IRUSR | S_IRGRP | S_IRGRP | S_IROTH),
                      STDOUT);
