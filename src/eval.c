@@ -105,7 +105,10 @@ int eval(Command* cmd)
         {
             int ret = eval_open_file(cmd->input.file, O_RDONLY, 0);
             if (ret != -1)
+            {
                 dup2(ret, STDIN);
+                close(ret);
+            }
             else
                 exit(ret);
         }
@@ -128,7 +131,10 @@ int eval(Command* cmd)
                 
                 int ret = eval_open_file(cmd->output.file, flags, S_IWUSR | S_IRUSR | S_IRGRP | S_IRGRP | S_IROTH);
                 if (ret != -1)
+                {
                     dup2(ret, STDOUT);
+                    close(ret);
+                }
                 else
                     exit(ret);
             }
