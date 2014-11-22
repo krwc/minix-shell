@@ -21,7 +21,7 @@ static void eval_begin_setup_io(Command* cmd, int fd[2])
 {
     if (cmd->input.type == STREAM_PIPE_OUT)
     {
-        printf("%s has input: %d\n", cmd->argv[0], fd[STDIN]);
+//        printf("%s has input: %d\n", cmd->argv[0], fd[STDIN]);
         close(STDIN);
         dup2(fd[STDIN], STDIN);
     }
@@ -33,8 +33,7 @@ static void eval_begin_setup_io(Command* cmd, int fd[2])
 
     if (cmd->output.type == STREAM_PIPE_IN)
     {
-        printf("%s has output: %d\n", cmd->argv[0], fd[STDOUT]);
-
+//        printf("%s has output: %d\n", cmd->argv[0], fd[STDOUT]);
         close(STDOUT);
         dup2(fd[STDOUT], STDOUT);
     }
@@ -115,12 +114,11 @@ int eval(Command* cmd)
         {
             close(STDIN);
             dup2(open(cmd->input.file, O_RDONLY), STDIN);
+            //printf("opening file %s to input\n", cmd->input.file);
         }
 
         if (cmd->output.type == STREAM_PIPE_IN)
         {
-//            printf("%s has output: %d\n", cmd->argv[0], fd[STDOUT]);
-
             close(STDOUT);
             dup2(fd[STDOUT], STDOUT);
         }

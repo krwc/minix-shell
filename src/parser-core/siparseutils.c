@@ -196,8 +196,8 @@ void resetPipelineLists(void)
     currentPipeline = PipelineListsbuf;
     currentPipelineListstart = PipelineListsbuf;
 }
-/*
- * printing
+
+// printing
 void printCommand(Command *com){
         char **arg;
         Redirection ** red;
@@ -215,4 +215,3 @@ void printCommand(Command *com){
         }
         printf("\n");
 }
- */

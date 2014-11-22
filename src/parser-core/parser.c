@@ -1,4 +1,5 @@
 #include "parser.h"
+#include <string.h>
 static Parser g_parser;
 
 void parser_parse_line(const char* input)
@@ -13,10 +14,13 @@ void parser_parse_line(const char* input)
     {
         while ((command = parser_get_command()))
         {
+            // zero memory
+            memset(&command->input, 0, sizeof(Stream));
+            memset(&command->output, 0, sizeof(Stream));
             command->argc = 0;
             for (int i = 0; command->argv[i] != NULL; i++)
                 ++command->argc; 
-
+            
             command->input.type  = STREAM_STDIN;
             command->output.type = STREAM_STDOUT;
 

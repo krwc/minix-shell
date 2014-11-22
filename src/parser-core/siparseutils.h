@@ -4,6 +4,7 @@
 #define MAX_ARGS MAX_COMMANDS
 #define MAX_REDIRS MAX_COMMANDS
 
+void printCommand(Command *com);
 void resetutils(void);
 
 /*
