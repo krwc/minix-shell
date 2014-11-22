@@ -17,47 +17,37 @@ bool eval_command_has_line(Command* cmd)
     return true;
 }
 
-static void eval_begin_setup_io(Command* cmd, int fd[2])
-{
-    if (cmd->input.type == STREAM_PIPE_OUT)
-    {
-//        printf("%s has input: %d\n", cmd->argv[0], fd[STDIN]);
-        close(STDIN);
-        dup2(fd[STDIN], STDIN);
-    }
-    else if (cmd->input.type == STREAM_FILE)
-    {
-        close(STDIN);
-        dup2(open(cmd->input.file, O_RDONLY), STDIN);
-    }
-
-    if (cmd->output.type == STREAM_PIPE_IN)
-    {
-//        printf("%s has output: %d\n", cmd->argv[0], fd[STDOUT]);
-        close(STDOUT);
-        dup2(fd[STDOUT], STDOUT);
-    }
-    else
-    {
-        if (cmd->redirs[0])
-        {
-            int flags = O_CREAT | O_WRONLY;
-            if (cmd->output.type == STREAM_FILE)
-                flags |= O_TRUNC;
-            if (cmd->output.type == STREAM_FILE_APPEND)
-                flags |= O_APPEND;
-
-            dup2(open(cmd->output.file, flags, S_IWUSR | S_IRUSR | S_IRGRP | S_IRGRP | S_IROTH), STDOUT);
-        }
-    }
-}
-
 static void eval_end_setup_io(Command* cmd, int fd[2])
 {
     if (cmd->output.type == STREAM_PIPE_IN)
         close(fd[STDOUT]);
     if (cmd->input.type == STREAM_PIPE_OUT)
         close(fd[STDIN]);
+}
+
+int eval_open_file(const char* path, int flags, int oflags)
+{
+    int fd = open(path, flags, oflags);
+    int error;
+
+    if (fd == -1)
+    {
+        error = errno;
+        
+        switch (error)
+        {
+        case EACCES:
+            message_error(path, EVAL_ERROR_EACCES);
+            break;
+        case ENOENT:
+            message_error(path, EVAL_ERROR_ENOENT);
+            break;
+        default:
+            message_error(path, EVAL_ERROR_UHNDLD);
+            break;
+        }
+    }
+    return fd;
 }
 
 int eval(Command* cmd)
@@ -112,9 +102,11 @@ int eval(Command* cmd)
         }
         else if (cmd->input.type == STREAM_FILE)
         {
-            close(STDIN);
-            dup2(open(cmd->input.file, O_RDONLY), STDIN);
-            //printf("opening file %s to input\n", cmd->input.file);
+            int ret = eval_open_file(cmd->input.file, O_RDONLY, 0);
+            if (ret != -1)
+                dup2(ret, STDIN);
+            else
+                exit(ret);
         }
 
         if (cmd->output.type == STREAM_PIPE_IN)
@@ -132,9 +124,11 @@ int eval(Command* cmd)
                 else if (cmd->output.type == STREAM_FILE_APPEND)
                     flags |= O_APPEND;
                 
-                dup2(open(cmd->output.file, flags,
-                          S_IWUSR | S_IRUSR | S_IRGRP | S_IRGRP | S_IROTH),
-                     STDOUT);
+                int ret = eval_open_file(cmd->output.file, flags, S_IWUSR | S_IRUSR | S_IRGRP | S_IRGRP | S_IROTH);
+                if (ret != -1)
+                    dup2(ret, STDOUT);
+                else
+                    exit(ret);
             }
         }
 
@@ -147,11 +141,11 @@ int eval(Command* cmd)
             switch (error)
             {
             case ENOENT:
-                message_error(cmd->argv[0], "no such file or directory\n"); break;
+                message_error(cmd->argv[0], EVAL_ERROR_EACCES); break;
             case EACCES:
-                message_error(cmd->argv[0], "permission denied\n"); break;
+                message_error(cmd->argv[0], EVAL_ERROR_ENOENT); break;
             default:
-                message_error(cmd->argv[0], "exec error\n"); break;
+                message_error(cmd->argv[0], EVAL_ERROR_EXEC); break;
             }
             exit(ret);
         }
