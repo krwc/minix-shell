@@ -1,15 +1,16 @@
 #include "message.h"
 #include "prompt.h"
+#include <stdio.h>
 
 void message_error(const char* program, const char* message)
 {
-    write(STDERR, program, strlen(program));
-    write(STDERR, ": ", 2);
-    write(STDERR, message, strlen(message));
+    fprintf(stderr, "%s: %s", program, message);
+    fflush(stderr);
 }
 
-void message(int output, const char* message)
+void message(FILE* output, const char* message)
 {
-    write(STDERR, message, strlen(message));
+    fprintf(output, "%s", message);
+    fflush(output);
     print_prompt();
 }

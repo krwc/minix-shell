@@ -51,9 +51,9 @@ static void sigchld_handler(int signum)
     // Some children was just killed
     int status;
     pid_t pid;
-
     while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
     {
+        
         if (children_in_fg(pid))
             --num_children_fg;
         else
@@ -117,6 +117,8 @@ int main()
             int fd[2];
             fd[STDIN]  = STDIN;
             fd[STDOUT] = STDOUT;
+            signal_block(SIGCHLD);
+            signal_block(SIGINT);
             while ((command = parser_get_command()))
             {
                 if (command->input.type  == STREAM_PIPE)
@@ -136,7 +138,8 @@ int main()
             }
             if (!background)
                 wait_for_foreground();
-
+            signal_unblock(SIGCHLD);
+            signal_unblock(SIGINT);
             parser_next_pipeline();
         }
         print_prompt();

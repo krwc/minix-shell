@@ -113,8 +113,6 @@ int eval(Command* cmd, int fd[2], bool background)
             return 0;
         }
     }
-    signal_block(SIGCHLD);
-    signal_block(SIGINT);
 
     pid_t child = fork();
     if (child == 0)
@@ -155,8 +153,6 @@ int eval(Command* cmd, int fd[2], bool background)
             children_bg[num_children_bg++] = child;
         else
             children_fg[num_children_fg++] = child;
-        signal_unblock(SIGCHLD);
-        signal_unblock(SIGINT);
     }
     return 1;
 }

@@ -31,6 +31,7 @@ void signal_init()
 void signal_block(int signum)
 {
     sigset_t sigset;
+    sigemptyset(&sigset);
     sigaddset(&sigset, signum);
     sigprocmask(SIG_BLOCK, &sigset, NULL);
 }
@@ -38,6 +39,7 @@ void signal_block(int signum)
 void signal_unblock(int signum)
 {
     sigset_t sigset;
+    sigemptyset(&sigset);
     sigaddset(&sigset, signum);
     sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 }

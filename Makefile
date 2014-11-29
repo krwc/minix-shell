@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-g
+CFLAGS=-ggdb 
 
 SOURCES=src/main.c src/eval.c src/message.c src/prompt.c src/input.c src/builtins.c src/signal.c
 OBJS=$(SOURCES:.c=.o)

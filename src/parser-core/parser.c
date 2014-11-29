@@ -1,6 +1,15 @@
 #include "parser.h"
+#include "../message.h"
 #include <string.h>
 static Parser g_parser;
+
+static bool parser_empty_command(const char* command)
+{
+    for (const char* ch = command; *ch; ch++)
+        if (*ch != ' ' || *ch != '\t')
+            return false;
+    return true;
+}
 
 void parser_parse_line(const char* input)
 {
@@ -13,8 +22,17 @@ void parser_parse_line(const char* input)
     Command* command;
     while ((pipeline = parser_get_pipeline()))
     {
+        int command_id = 0;
         while ((command = parser_get_command()))
         {
+            if (command->argv[0] == NULL && command_id && strlen(input) >= 2)
+            {
+                fprintf(stderr, "%s", MSG_SYNTAX_ERROR);
+                fflush(stderr);
+                parser_ignore_line();
+                return;
+            }
+            
             // zero memory
             memset(&command->input, 0, sizeof(Stream));
             memset(&command->output, 0, sizeof(Stream));
@@ -57,6 +75,7 @@ void parser_parse_line(const char* input)
                 }
             }
             parser_next_command();
+            ++command_id;
         }
         parser_next_pipeline();
     }

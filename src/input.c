@@ -97,7 +97,7 @@ const char* input_get_line()
                 return input_get_line();
             else
             {
-                message(STDERR, MSG_SYNTAX_ERROR);
+                message(stderr, MSG_SYNTAX_ERROR);
                 // Skip characters till you find a newline.
                 input_skip_till_newline();
                 return input_get_line();
