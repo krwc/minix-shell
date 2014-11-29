@@ -38,10 +38,7 @@ static bool children_in_fg(pid_t pid)
 
 static void sigint_handler(int signum)
 {
-    // We must kill children working in the foreground and ignore commands
-    // till the end of the line.
-    for (int i = 0; i < num_children_fg; i++)
-        kill(children_fg[i], SIGKILL);
+    // We must ignore ignore commands till the end of the line.
     num_children_fg = 0;
     parser_ignore_line();
 }
