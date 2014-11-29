@@ -1,6 +1,8 @@
 #include "prompt.h"
 #include "config.h"
 #include "main.h"
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
