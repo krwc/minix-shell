@@ -7,6 +7,7 @@ void parser_parse_line(const char* input)
     g_parser.parsed_line = parseline((char*)input);
     g_parser.pipeline = 0;
     g_parser.command = 0;
+    g_parser.background = g_parser.parsed_line->flags == LINBACKGROUND;
 
     Pipeline pipeline;
     Command* command;
@@ -25,14 +26,14 @@ void parser_parse_line(const char* input)
             command->output.type = STREAM_STDOUT;
 
             if (parser_has_next_command())
-            {
-//                printf("%s has next\n", command->argv[0]);
-                command->output.type = STREAM_PIPE_IN;
-            }
+                command->output.type = STREAM_PIPE;
             if (parser_has_prev_command())
             {
-  //              printf("%s has prev\n", command->argv[0]);
-                command->input.type  = STREAM_PIPE_OUT;
+                Command* prev = parser_get_pipeline()[g_parser.command - 1];
+                if (prev->output.type == STREAM_PIPE)
+                    command->input.type  = STREAM_PIPE;
+                else
+                    command->input.type  = STREAM_STDIN;
             }
             
             for (int i = 0; command->redirs[i] != NULL; i++)
@@ -73,6 +74,7 @@ Command* parser_get_command()
     return parser_get_pipeline()[g_parser.command];
 }
 
+
 void parser_next_pipeline()
 {
     if (parser_get_pipeline())
@@ -80,6 +82,12 @@ void parser_next_pipeline()
         g_parser.command = 0;
         g_parser.pipeline++;
     }
+}
+
+void parser_ignore_line()
+{
+    while (parser_get_pipeline())
+        parser_next_pipeline();
 }
 
 void parser_next_command()
@@ -98,3 +106,7 @@ bool parser_has_prev_command()
     return g_parser.command && parser_get_pipeline()[g_parser.command - 1];
 }
 
+bool parser_in_background()
+{
+    return g_parser.background;
+}

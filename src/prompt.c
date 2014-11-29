@@ -4,6 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+static bool has_char_device = false;
+
+void prompt_init()
+{
+    struct stat input_stat;
+    fstat(STDIN, &input_stat);
+
+    has_char_device = S_ISCHR(input_stat.st_mode);
+}
 
 const char* prompt_get_username()
 {
@@ -82,16 +91,31 @@ void prompt_prepare(const char* prompt_declaration)
     }
 }
 
+bool prompt_should_print()
+{
+    return has_char_device;
+}
+
 void print_prompt()
 {
-    struct stat input_stat;
-    fstat(STDIN, &input_stat);
-    
     // Write prompt if stdin is a character-device.
-    if (S_ISCHR(input_stat.st_mode))
+    if (prompt_should_print())
     {
+        signal_block(SIGCHLD);
+        for (int i = 0; i < num_children_bg_terminated; i++)
+        {
+            const int status = children_bg_terminated_status[i];
+            const pid_t pid  = children_bg_terminated[i];
+            const char* reason = WIFEXITED(status) ? "exited with status" : "killed by signal";
+            const int statusno = WIFEXITED(status) ? status : WTERMSIG(status);
+            fprintf(stdout, "Background process %d terminated. (%s %d)\n", pid, reason, status);
+        }
+        num_children_bg_terminated = 0;
+        signal_unblock(SIGCHLD);
+
         prompt_prepare(PROMPT_DEFAULT);
-        write(STDOUT, prompt_buffer, strlen(prompt_buffer));
+        fprintf(stdout, "%s", prompt_buffer);
+        fflush(stdout);
     }
 }
 

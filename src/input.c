@@ -1,4 +1,5 @@
 #include "input.h"
+#include <errno.h>
 static Input input;
 static char input_buffer[MAX_LINE_LENGTH + 1];
 static char line_buffer[MAX_LINE_LENGTH + 1];
@@ -10,6 +11,9 @@ ssize_t input_read()
     while (true)
     {
         num_bytes = read(STDIN, input_buffer + input.size, MAX_LINE_LENGTH - input.size);
+        if (num_bytes == -1 && errno == EINTR)
+            continue;
+
         input.size = input.size == 0 ? num_bytes : input.size + num_bytes;
 
         if (num_bytes && input.size < MAX_LINE_LENGTH && input_buffer[input.size-1] != '\n')
@@ -57,8 +61,17 @@ void input_move_input_data(size_t data_start)
 void input_skip_till_newline()
 {
     char ch;
-    while (read(STDIN, &ch, 1) > 0 && ch != '\n');
+    while (true)
+    {
+        int ret = read(STDIN, &ch, 1);
 
+        if (ret == -1 && errno == EINTR)
+            continue;
+        if (ret > 0 && ch != '\n')
+            continue;
+        else
+            break;
+    }
     input.size = 0;
 }
 

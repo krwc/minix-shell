@@ -23,8 +23,7 @@ typedef enum StreamType
 {
     STREAM_STDIN,
     STREAM_STDOUT,
-    STREAM_PIPE_IN,
-    STREAM_PIPE_OUT,
+    STREAM_PIPE,
     STREAM_FILE,
     STREAM_FILE_APPEND
 } StreamType;
