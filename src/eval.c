@@ -118,20 +118,19 @@ int eval(Command* cmd, int fd[2], bool background)
     pid_t child = fork();
     if (child == 0)
     {
+        if (background)
+            setsid();
+
         signal_reset_handler(SIGINT);
         signal_reset_handler(SIGCHLD);
-        
+
         if (cmd->input.type == STREAM_PIPE)
         {
             if (fd[STDIN] != STDIN)
             {
-                printf("%s has input : %d\n", cmd->argv[0], fd[STDIN]);
                 dup2(fd[STDIN], STDIN);
                 close(fd[STDIN]);
             }
-            else
-                printf("%s has input : %d\n", cmd->argv[0], fd[STDIN]);
-
         }
         else if (cmd->input.type == STREAM_FILE)
             if (!eval_redir_from_file(cmd))
