@@ -120,10 +120,11 @@ int eval(Command* cmd, int fd[2], bool background)
         if (background)
             setsid();
 
-        signal_unblock(SIGINT);
-        signal_unblock(SIGCHLD);
         signal_reset_handler(SIGINT);
         signal_reset_handler(SIGCHLD);
+        signal_unblock(SIGINT);
+        signal_unblock(SIGCHLD);
+
 
         if (cmd->input.type == STREAM_PIPE)
         {
