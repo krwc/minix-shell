@@ -39,7 +39,6 @@ static bool children_in_fg(pid_t pid)
 static void sigint_handler(int signum)
 {
     // We must ignore ignore commands till the end of the line.
-    num_children_fg = 0;
     parser_ignore_line();
 }
 
@@ -50,7 +49,6 @@ static void sigchld_handler(int signum)
     pid_t pid;
     while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
     {
-        
         if (children_in_fg(pid))
             --num_children_fg;
         else
@@ -67,6 +65,7 @@ static void sigchld_handler(int signum)
 void wait_for_foreground()
 {
     const sigset_t mask = signal_get_default_sigset();
+    assert(num_children_fg >= 0 && "num_children_fg should not be negative");
     while (num_children_fg)
         sigsuspend(&mask);
 }

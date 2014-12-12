@@ -1,7 +1,12 @@
 #include "parser.h"
 #include "../message.h"
 #include <string.h>
-static Parser g_parser;
+static Parser g_parser = {
+  .parsed_line = NULL,
+  .pipeline = 0,
+  .command = 0,
+  .background = false
+};
 
 static bool parser_empty_command(const char* command)
 {
@@ -16,6 +21,12 @@ void parser_parse_line(const char* input)
     g_parser.parsed_line = parseline((char*)input);
     g_parser.pipeline = 0;
     g_parser.command = 0;
+    if (g_parser.parsed_line == NULL)
+    {
+        fprintf(stderr, "%s", MSG_SYNTAX_ERROR);
+        fflush(stderr);
+        return;
+    }
     g_parser.background = g_parser.parsed_line->flags == LINBACKGROUND;
 
     Pipeline pipeline;
@@ -85,7 +96,9 @@ void parser_parse_line(const char* input)
 
 Pipeline parser_get_pipeline()
 {
-    return g_parser.parsed_line->pipelines[g_parser.pipeline];
+    if (g_parser.parsed_line)
+        return g_parser.parsed_line->pipelines[g_parser.pipeline];
+    return NULL;
 }
 
 Command* parser_get_command()
