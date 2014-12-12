@@ -8,14 +8,6 @@ static Parser g_parser = {
   .background = false
 };
 
-static bool parser_empty_command(const char* command)
-{
-    for (const char* ch = command; *ch; ch++)
-        if (*ch != ' ' || *ch != '\t')
-            return false;
-    return true;
-}
-
 void parser_parse_line(const char* input)
 {
     g_parser.parsed_line = parseline((char*)input);
